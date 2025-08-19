@@ -1,0 +1,71 @@
+{
+  "name": "mcp-playwright-analysis-test",
+  "version": "1.0.0",
+  "description": "Comprehensive test suite for ServeRest API with automated Postman collection and CI/CD pipeline",
+  "main": "index.js",
+  "scripts": {
+    "test": "newman run postman/collection/ServeRest-Collection.json -e postman/environment/ServeRest-Environment.json",
+    "test:report": "newman run postman/collection/ServeRest-Collection.json -e postman/environment/ServeRest-Environment.json -r html,json,junit --reporter-html-export reports/newman-report.html --reporter-json-export reports/newman-report.json --reporter-junit-export reports/newman-report.xml",
+    "test:functional": "newman run postman/collection/ServeRest-Collection.json -e postman/environment/ServeRest-Environment.json --folder \"1. MÓDULO LOGIN\" --folder \"2. MÓDULO USUÁRIOS\" --folder \"3. MÓDULO PRODUTOS\" --folder \"4. MÓDULO CARRINHOS\"",
+    "test:integration": "newman run postman/collection/ServeRest-Collection.json -e postman/environment/ServeRest-Environment.json --folder \"5. TESTES DE INTEGRAÇÃO\"",
+    "test:performance": "newman run postman/collection/ServeRest-Collection.json -e postman/environment/ServeRest-Environment.json --folder \"6. TESTES DE PERFORMANCE\"",
+    "test:ci": "newman run postman/collection/ServeRest-Collection.json -e postman/environment/ServeRest-Environment.json -r json,junit --reporter-json-export reports/newman-report.json --reporter-junit-export reports/newman-report.xml --suppress-exit-code",
+    "install:newman": "npm install -g newman",
+    "setup": "mkdir -p reports && npm run install:newman",
+    "clean": "rm -rf reports/*.html reports/*.json reports/*.xml",
+    "validate": "newman run postman/collection/ServeRest-Collection.json -e postman/environment/ServeRest-Environment.json --dry-run"
+  },
+  "keywords": [
+    "api-testing",
+    "postman",
+    "newman",
+    "automation",
+    "serveRest",
+    "qa",
+    "testing",
+    "ci-cd",
+    "github-actions"
+  ],
+  "author": {
+    "name": "Jacques Schmitz Junior",
+    "email": "juniorschmitz9@gmail.com",
+    "url": "https://github.com/juniorschmitz"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/juniorschmitz/mcp-playwright-analysis-test.git"
+  },
+  "homepage": "https://github.com/juniorschmitz/mcp-playwright-analysis-test#readme",
+  "bugs": {
+    "url": "https://github.com/juniorschmitz/mcp-playwright-analysis-test/issues"
+  },
+  "devDependencies": {
+    "newman": "^6.1.2",
+    "newman-reporter-html": "^1.0.5",
+    "newman-reporter-htmlextra": "^1.23.1"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "files": [
+    "postman/",
+    "docs/",
+    "reports/",
+    "README.md",
+    "LICENSE"
+  ],
+  "directories": {
+    "doc": "docs",
+    "test": "postman"
+  },
+  "config": {
+    "newman": {
+      "timeout": 30000,
+      "bail": false,
+      "color": "on"
+    }
+  }
+}
