@@ -1,0 +1,1303 @@
+{
+	"info": {
+		"_postman_id": "f3a8b2d1-2c5e-4a1f-9b6d-3e7f8c9d0e1f",
+		"name": "ServeRest API - Testes Automatizados",
+		"description": "Collection completa para testes da API ServeRest com validações automatizadas",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://compassuol.serverest.dev",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "productId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "cartId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "timestamp",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"exec": [
+					"// Gerar timestamp único para testes",
+					"pm.variables.set('timestamp', Date.now());"
+				],
+				"type": "text/javascript"
+			}
+		}
+	],
+	"item": [
+		{
+			"name": "1. MÓDULO LOGIN",
+			"item": [
+				{
+					"name": "CT001 - Login com credenciais válidas",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('CT001 - Status deve ser 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('CT001 - Deve retornar message de sucesso', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.eql('Login realizado com sucesso');",
+									"});",
+									"",
+									"pm.test('CT001 - Deve retornar authorization token', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.authorization).to.include('Bearer');",
+									"    ",
+									"    // Salvar token para próximos testes",
+									"    pm.collectionVariables.set('token', jsonData.authorization);",
+									"});",
+									"",
+									"pm.test('CT001 - Token deve ter formato JWT válido', function () {",
+									"    var jsonData = pm.response.json();",
+									"    var token = jsonData.authorization.replace('Bearer ', '');",
+									"    var parts = token.split('.');",
+									"    pm.expect(parts).to.have.lengthOf(3);",
+									"});",
+									"",
+									"pm.test('CT001 - Response time menor que 2000ms', function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"fulano@qa.com\",\n  \"password\": \"teste\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "CT002 - Login com email inválido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('CT002 - Status deve ser 401', function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test('CT002 - Deve retornar message de erro', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.eql('Email e/ou senha inválidos');",
+									"});",
+									"",
+									"pm.test('CT002 - Não deve retornar authorization', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.not.have.property('authorization');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"emailinvalido@qa.com\",\n  \"password\": \"teste\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "CT003 - Login com senha inválida",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('CT003 - Status deve ser 401', function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test('CT003 - Deve retornar message de erro', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.eql('Email e/ou senha inválidos');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"fulano@qa.com\",\n  \"password\": \"senhaerrada\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. MÓDULO USUÁRIOS",
+			"item": [
+				{
+					"name": "CT006 - Listar todos os usuários",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('CT006 - Status deve ser 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('CT006 - Deve retornar quantidade de usuários', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('quantidade');",
+									"    pm.expect(jsonData.quantidade).to.be.a('number');",
+									"});",
+									"",
+									"pm.test('CT006 - Deve retornar array de usuários', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('usuarios');",
+									"    pm.expect(jsonData.usuarios).to.be.an('array');",
+									"});",
+									"",
+									"pm.test('CT006 - Usuários devem ter estrutura correta', function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.usuarios.length > 0) {",
+									"        var usuario = jsonData.usuarios[0];",
+									"        pm.expect(usuario).to.have.property('_id');",
+									"        pm.expect(usuario).to.have.property('nome');",
+									"        pm.expect(usuario).to.have.property('email');",
+									"        pm.expect(usuario).to.have.property('password');",
+									"        pm.expect(usuario).to.have.property('administrador');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"usuarios"
+							]
+						}
+					}
+				},
+				{
+					"name": "CT010 - Cadastrar usuário válido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('CT010 - Status deve ser 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('CT010 - Deve retornar message de sucesso', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.eql('Cadastro realizado com sucesso');",
+									"});",
+									"",
+									"pm.test('CT010 - Deve retornar ID do usuário criado', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('_id');",
+									"    pm.expect(jsonData._id).to.be.a('string');",
+									"    ",
+									"    // Salvar ID para próximos testes",
+									"    pm.collectionVariables.set('userId', jsonData._id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Usuário Teste {{timestamp}}\",\n  \"email\": \"teste{{timestamp}}@qa.com\",\n  \"password\": \"123456\",\n  \"administrador\": \"false\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"usuarios"
+							]
+						}
+					}
+				},
+				{
+					"name": "CT012 - Cadastrar usuário com email duplicado",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('CT012 - Status deve ser 400', function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test('CT012 - Deve retornar message de erro', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.eql('Este email já está sendo usado');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Usuário Duplicado\",\n  \"email\": \"fulano@qa.com\",\n  \"password\": \"123456\",\n  \"administrador\": \"false\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/usuarios",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"usuarios"
+							]
+						}
+					}
+				},
+				{
+					"name": "CT016 - Buscar usuário por ID válido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('CT016 - Status deve ser 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('CT016 - Deve retornar dados do usuário', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('_id');",
+									"    pm.expect(jsonData).to.have.property('nome');",
+									"    pm.expect(jsonData).to.have.property('email');",
+									"    pm.expect(jsonData).to.have.property('password');",
+									"    pm.expect(jsonData).to.have.property('administrador');",
+									"});",
+									"",
+									"pm.test('CT016 - ID deve corresponder ao solicitado', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData._id).to.eql(pm.collectionVariables.get('userId'));",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/usuarios/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"usuarios",
+								"{{userId}}"
+							]
+						}
+					}
+				},
+				{
+					"name": "CT017 - Buscar usuário por ID inválido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('CT017 - Status deve ser 400', function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test('CT017 - Deve retornar message de erro', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.eql('Usuário não encontrado');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/usuarios/idinexistente123",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"usuarios",
+								"idinexistente123"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. MÓDULO PRODUTOS",
+			"item": [
+				{
+					"name": "CT024 - Listar todos os produtos",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('CT024 - Status deve ser 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('CT024 - Deve retornar quantidade de produtos', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('quantidade');",
+									"    pm.expect(jsonData.quantidade).to.be.a('number');",
+									"});",
+									"",
+									"pm.test('CT024 - Deve retornar array de produtos', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('produtos');",
+									"    pm.expect(jsonData.produtos).to.be.an('array');",
+									"});",
+									"",
+									"pm.test('CT024 - Produtos devem ter estrutura correta', function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.produtos.length > 0) {",
+									"        var produto = jsonData.produtos[0];",
+									"        pm.expect(produto).to.have.property('_id');",
+									"        pm.expect(produto).to.have.property('nome');",
+									"        pm.expect(produto).to.have.property('preco');",
+									"        pm.expect(produto).to.have.property('descricao');",
+									"        pm.expect(produto).to.have.property('quantidade');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/produtos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"produtos"
+							]
+						}
+					}
+				},
+				{
+					"name": "CT028 - Cadastrar produto como administrador",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Fazer login como administrador primeiro",
+									"pm.sendRequest({",
+									"    url: pm.variables.get('baseUrl') + '/login',",
+									"    method: 'POST',",
+									"    header: {",
+									"        'Content-Type': 'application/json'",
+									"    },",
+									"    body: {",
+									"        mode: 'raw',",
+									"        raw: JSON.stringify({",
+									"            \"email\": \"beltrano@qa.com.br\",",
+									"            \"password\": \"teste\"",
+									"        })",
+									"    }",
+									"}, function (err, response) {",
+									"    if (response.code === 200) {",
+									"        var jsonData = response.json();",
+									"        pm.collectionVariables.set('token', jsonData.authorization);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('CT028 - Status deve ser 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('CT028 - Deve retornar message de sucesso', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.eql('Cadastro realizado com sucesso');",
+									"});",
+									"",
+									"pm.test('CT028 - Deve retornar ID do produto criado', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('_id');",
+									"    pm.expect(jsonData._id).to.be.a('string');",
+									"    ",
+									"    // Salvar ID para próximos testes",
+									"    pm.collectionVariables.set('productId', jsonData._id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Produto Teste {{timestamp}}\",\n  \"preco\": 100,\n  \"descricao\": \"Descrição do produto teste\",\n  \"quantidade\": 50\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/produtos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"produtos"
+							]
+						}
+					}
+				},
+				{
+					"name": "CT029 - Cadastrar produto sem autenticação",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('CT029 - Status deve ser 401', function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test('CT029 - Deve retornar message de erro', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('Token de acesso ausente');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nome\": \"Produto Sem Auth\",\n  \"preco\": 100,\n  \"descricao\": \"Teste sem autenticação\",\n  \"quantidade\": 50\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/produtos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"produtos"
+							]
+						}
+					}
+				},
+				{
+					"name": "CT033 - Buscar produto por ID válido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('CT033 - Status deve ser 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('CT033 - Deve retornar dados do produto', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('_id');",
+									"    pm.expect(jsonData).to.have.property('nome');",
+									"    pm.expect(jsonData).to.have.property('preco');",
+									"    pm.expect(jsonData).to.have.property('descricao');",
+									"    pm.expect(jsonData).to.have.property('quantidade');",
+									"});",
+									"",
+									"pm.test('CT033 - ID deve corresponder ao solicitado', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData._id).to.eql('BeeJh5lz3k6kSIzA');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/produtos/BeeJh5lz3k6kSIzA",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"produtos",
+								"BeeJh5lz3k6kSIzA"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. MÓDULO CARRINHOS",
+			"item": [
+				{
+					"name": "CT042 - Listar todos os carrinhos",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('CT042 - Status deve ser 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('CT042 - Deve retornar quantidade de carrinhos', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('quantidade');",
+									"    pm.expect(jsonData.quantidade).to.be.a('number');",
+									"});",
+									"",
+									"pm.test('CT042 - Deve retornar array de carrinhos', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('carrinhos');",
+									"    pm.expect(jsonData.carrinhos).to.be.an('array');",
+									"});",
+									"",
+									"pm.test('CT042 - Carrinhos devem ter estrutura correta', function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.carrinhos.length > 0) {",
+									"        var carrinho = jsonData.carrinhos[0];",
+									"        pm.expect(carrinho).to.have.property('produtos');",
+									"        pm.expect(carrinho).to.have.property('precoTotal');",
+									"        pm.expect(carrinho).to.have.property('quantidadeTotal');",
+									"        pm.expect(carrinho).to.have.property('idUsuario');",
+									"        pm.expect(carrinho).to.have.property('_id');",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/carrinhos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"carrinhos"
+							]
+						}
+					}
+				},
+				{
+					"name": "CT045 - Cadastrar carrinho válido",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Fazer login como usuário comum primeiro",
+									"pm.sendRequest({",
+									"    url: pm.variables.get('baseUrl') + '/login',",
+									"    method: 'POST',",
+									"    header: {",
+									"        'Content-Type': 'application/json'",
+									"    },",
+									"    body: {",
+									"        mode: 'raw',",
+									"        raw: JSON.stringify({",
+									"            \"email\": \"fulano@qa.com\",",
+									"            \"password\": \"teste\"",
+									"        })",
+									"    }",
+									"}, function (err, response) {",
+									"    if (response.code === 200) {",
+									"        var jsonData = response.json();",
+									"        pm.collectionVariables.set('token', jsonData.authorization);",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('CT045 - Status deve ser 201', function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test('CT045 - Deve retornar message de sucesso', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.eql('Cadastro realizado com sucesso');",
+									"});",
+									"",
+									"pm.test('CT045 - Deve retornar ID do carrinho criado', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('_id');",
+									"    pm.expect(jsonData._id).to.be.a('string');",
+									"    ",
+									"    // Salvar ID para próximos testes",
+									"    pm.collectionVariables.set('cartId', jsonData._id);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"produtos\": [\n    {\n      \"idProduto\": \"BeeJh5lz3k6kSIzA\",\n      \"quantidade\": 1\n    },\n    {\n      \"idProduto\": \"K6leHdftCeOJj8BJ\",\n      \"quantidade\": 2\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/carrinhos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"carrinhos"
+							]
+						}
+					}
+				},
+				{
+					"name": "CT050 - Cadastrar carrinho sem autenticação",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('CT050 - Status deve ser 401', function () {",
+									"    pm.response.to.have.status(401);",
+									"});",
+									"",
+									"pm.test('CT050 - Deve retornar message de erro', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include('Token de acesso ausente');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"produtos\": [\n    {\n      \"idProduto\": \"BeeJh5lz3k6kSIzA\",\n      \"quantidade\": 1\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/carrinhos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"carrinhos"
+							]
+						}
+					}
+				},
+				{
+					"name": "CT051 - Buscar carrinho por ID válido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('CT051 - Status deve ser 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('CT051 - Deve retornar dados do carrinho', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('produtos');",
+									"    pm.expect(jsonData).to.have.property('precoTotal');",
+									"    pm.expect(jsonData).to.have.property('quantidadeTotal');",
+									"    pm.expect(jsonData).to.have.property('idUsuario');",
+									"    pm.expect(jsonData).to.have.property('_id');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/carrinhos/qbMqntef4iTOwWfg",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"carrinhos",
+								"qbMqntef4iTOwWfg"
+							]
+						}
+					}
+				},
+				{
+					"name": "CT056 - Cancelar compra com carrinho existente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('CT056 - Status deve ser 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('CT056 - Deve retornar message de sucesso ou não encontrado', function () {",
+									"    var jsonData = pm.response.json();",
+									"    var validMessages = [",
+									"        'Registro excluído com sucesso',",
+									"        'Não foi encontrado carrinho para esse usuário'",
+									"    ];",
+									"    pm.expect(validMessages).to.include(jsonData.message);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{token}}"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/carrinhos/cancelar-compra",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"carrinhos",
+								"cancelar-compra"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "5. TESTES DE INTEGRAÇÃO",
+			"item": [
+				{
+					"name": "CI001 - Fluxo completo de compra",
+					"item": [
+						{
+							"name": "1. Cadastrar usuário para compra",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('CI001.1 - Usuário cadastrado com sucesso', function () {",
+											"    pm.response.to.have.status(201);",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.message).to.eql('Cadastro realizado com sucesso');",
+											"    pm.collectionVariables.set('integrationUserId', jsonData._id);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"nome\": \"Usuário Integração {{timestamp}}\",\n  \"email\": \"integracao{{timestamp}}@qa.com\",\n  \"password\": \"123456\",\n  \"administrador\": \"false\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/usuarios",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"usuarios"
+									]
+								}
+							}
+						},
+						{
+							"name": "2. Fazer login com usuário",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('CI001.2 - Login realizado com sucesso', function () {",
+											"    pm.response.to.have.status(200);",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.message).to.eql('Login realizado com sucesso');",
+											"    pm.collectionVariables.set('integrationToken', jsonData.authorization);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"integracao{{timestamp}}@qa.com\",\n  \"password\": \"123456\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/login",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"login"
+									]
+								}
+							}
+						},
+						{
+							"name": "3. Listar produtos disponíveis",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('CI001.3 - Produtos listados com sucesso', function () {",
+											"    pm.response.to.have.status(200);",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.produtos).to.be.an('array');",
+											"    pm.expect(jsonData.produtos.length).to.be.above(0);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/produtos",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"produtos"
+									]
+								}
+							}
+						},
+						{
+							"name": "4. Cadastrar carrinho com produtos",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('CI001.4 - Carrinho cadastrado com sucesso', function () {",
+											"    pm.response.to.have.status(201);",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.message).to.eql('Cadastro realizado com sucesso');",
+											"    pm.collectionVariables.set('integrationCartId', jsonData._id);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "{{integrationToken}}"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"produtos\": [\n    {\n      \"idProduto\": \"BeeJh5lz3k6kSIzA\",\n      \"quantidade\": 1\n    }\n  ]\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/carrinhos",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"carrinhos"
+									]
+								}
+							}
+						},
+						{
+							"name": "5. Verificar carrinho criado",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('CI001.5 - Carrinho encontrado com sucesso', function () {",
+											"    pm.response.to.have.status(200);",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData._id).to.eql(pm.collectionVariables.get('integrationCartId'));",
+											"    pm.expect(jsonData.produtos).to.be.an('array');",
+											"    pm.expect(jsonData.produtos.length).to.be.above(0);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/carrinhos/{{integrationCartId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"carrinhos",
+										"{{integrationCartId}}"
+									]
+								}
+							}
+						},
+						{
+							"name": "6. Concluir compra",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('CI001.6 - Compra concluída com sucesso', function () {",
+											"    pm.response.to.have.status(200);",
+											"    var jsonData = pm.response.json();",
+											"    var validMessages = [",
+											"        'Registro excluído com sucesso',",
+											"        'Não foi encontrado carrinho para esse usuário'",
+											"    ];",
+											"    pm.expect(validMessages).to.include(jsonData.message);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "{{integrationToken}}"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/carrinhos/concluir-compra",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"carrinhos",
+										"concluir-compra"
+									]
+								}
+							}
+						},
+						{
+							"name": "7. Verificar que carrinho foi excluído",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test('CI001.7 - Carrinho foi excluído', function () {",
+											"    pm.response.to.have.status(400);",
+											"    var jsonData = pm.response.json();",
+											"    pm.expect(jsonData.message).to.eql('Carrinho não encontrado');",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/carrinhos/{{integrationCartId}}",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"carrinhos",
+										"{{integrationCartId}}"
+									]
+								}
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "6. TESTES DE PERFORMANCE",
+			"item": [
+				{
+					"name": "Performance - Login múltiplo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Performance - Response time menor que 1000ms', function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+									"});",
+									"",
+									"pm.test('Performance - Status deve ser 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"fulano@qa.com\",\n  \"password\": \"teste\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "Performance - Listar produtos",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test('Performance - Response time menor que 2000ms', function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"pm.test('Performance - Status deve ser 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test('Performance - Deve retornar dados válidos', function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('produtos');",
+									"    pm.expect(jsonData.produtos).to.be.an('array');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/produtos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"produtos"
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}
